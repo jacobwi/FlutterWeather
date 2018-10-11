@@ -11,4 +11,4 @@ Cross-platform, native weather app for iOS and Android. This application was dev
  - [geocoder](https://github.com/aloisdeniel/flutter_geocoder)
 
 # Screenshot
-![](./screenshoots/screen.png)
+<img src="https://github.com/onlyserenity/FlutterWeather/blob/master/screenshoots/1.png" width="280">
