@@ -8,39 +8,69 @@ import 'package:http/http.dart' as http;
 import 'package:weather_application/ui/res.dart';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
-
+import 'package:weather_application/ui/WeatherItem.dart';
 class Weather extends State<HomePage> {
   Map<String, double> currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSub;
   final myController = new TextEditingController();
-  WeatherData _token;
-  Location location = new Location();
+  WeatherData weatherData;
+  bool isLoading = false;
+  Location location;
   String zipCode = "03301";
   @override
   void initState() {
     super.initState();
-    // currentLocation['latitude'] = 0.0;
-    // currentLocation['longitude'] = 0.0;
+    currentLocation['latitude'] = 0.0;
+    currentLocation['longitude'] = 0.0;
 
-    // initPlatformState();
-    // locationSub = location.onLocationChanged().listen((Map<String, double> result) {
-      // setState(() {
-        //currentLocation = result;
-      //}
-     // );
-   // });
-    
+    fetchData();
   }
 
-  Future<WeatherData> fetchData() async {
+  fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final respone = await http.get("http://api.openweathermap.org/data/2.5/weather?zip=$zipCode,us&APPID=" + Api.apiCode);
     if (respone.statusCode == 200) {
       var result = json.decode(respone.body);
-      return WeatherData.fromJson(result);
+      return setState(() {
+        weatherData = new WeatherData.fromJson(result);
+        isLoading = false;
+      });
     }
     else {
+      setState(() {
+        isLoading = false;
+      });
       throw ("Loading data   ");
     }
+
+
+  }
+
+  fetchDataFromCoords() async {
+    setState(() {
+      isLoading = true;
+    });
+    double lat = currentLocation['latitude'];
+    double lon = currentLocation['longitude'];
+    final respone = await http.get("http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&APPID=" + Api.apiCode);
+    if (respone.statusCode == 200) {
+      var result = json.decode(respone.body);
+      return setState(() {
+        weatherData = new WeatherData.fromJson(result);
+        isLoading = false;
+      });
+    }
+    else {
+      setState(() {
+        isLoading = false;
+      });
+      throw ("Loading data   ");
+    }
+
+
   }
 
   submitData(String zip) {
@@ -65,86 +95,52 @@ class Weather extends State<HomePage> {
         child: Column(
           children: <Widget>[
             Padding(padding: EdgeInsets.all(40.0),
-              child: Theme(data: ThemeData(
-                  hintColor: Colors.grey,
-                primarySwatch: Colors.grey
-              ),
-                child: TextField(
-                  controller: myController,
-                onChanged: (String e) {
-                    setState(() {
-                      zipCode = e;
-                    });
-                },
-                  onSubmitted: submitData,
-                decoration: new InputDecoration(
-                  border: UnderlineInputBorder(
-                    borderRadius: BorderRadius.circular(40.0),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.location_city,
-                    color: $res.tempColors,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey,
-                  hintText: "Enter zipcode...",
+                child: Theme(data: ThemeData(
+                    hintColor: Colors.grey,
+                    primarySwatch: Colors.grey
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              )
+                  child: TextField(
+                    controller: myController,
+                    onChanged: (String e) {
+                      setState(() {
+                        zipCode = e;
+                      });
+                    },
+                    onSubmitted: submitData,
+                    decoration: new InputDecoration(
+                      border: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(40.0),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.location_city,
+                        color: $res.tempColors,
+                      ),
+                      suffixIcon: new IconButton(
+                        icon: new Icon(Icons.gps_fixed),
+                        color: Colors.black,
+                        onPressed: () { setState(() {
+                          location = new Location();
+                          initPlatformState();
+                          if(currentLocation['latitude'] != 0.0 || currentLocation['longitude'] != 0.0) {
+                            fetchDataFromCoords();
+                            print(currentLocation['latitude'].toString());
+                          }
+                        }); },
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey,
+                      hintText: "Enter zipcode...",
+                      hintStyle: TextStyle(
+                        color: $res.tempColors
+                      )
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                )
             ),
-            Padding(padding: EdgeInsets.only(),
-              child: Column(
-                children: <Widget>[
-                  new FutureBuilder<WeatherData>(
-                      future: fetchData(),
-                      builder: (BuildContext context,  AsyncSnapshot<WeatherData> snapshot) {
-                        if (snapshot.hasData) {
-                          WeatherData data = snapshot.data;
-                          final temp = data.weatherTemp.toString().split(
-                              ".")[0] + "°";
-                          final desc = data.weatherDesc;
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              new Text(data.cityName, style: TextStyle(
-                                color: $res.tempColors,
-                                fontSize: 23.0,
-                                fontWeight: FontWeight.w500,
-                              )),
-                              new Text(
-                                  '${desc[0].toUpperCase()}${desc.substring(
-                                      1)}', style: TextStyle(
-                                color: $res.tempColors,
-                                fontSize: 19.0,
-                                fontWeight: FontWeight.w500,
-                              )),
-                              new Text(temp, style: TextStyle(
-                                color: $res.tempColors,
-                                fontSize: 70.0,
-                                fontWeight: FontWeight.w500,
-                              ))
-                            ],
-                          );
-                        }
-                        else if (snapshot.hasError) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(snapshot.error),
-                              SizedBox(
-                                child: CircularProgressIndicator(),
-                                height: 20.0,
-                                width: 20.0,
-                              )
-                            ],
-                          );
-
-                        }
-                        return CircularProgressIndicator();
-                      },)
-                ],
-              ),
+            Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: weatherData != null ? WeatherItem(data: weatherData) : Container(),
             )
           ],
         ),

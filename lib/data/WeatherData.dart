@@ -19,11 +19,12 @@ class WeatherData{
   double weatherHumidity;
 
   String cityName;
-
+  int dateTime;
   WeatherData({this.lon, this.lat, this.id, this.weather, this.weatherDesc,
-      this.weatherTemp, this.weatherHumidity, this.cityName});
+      this.weatherTemp, this.weatherHumidity, this.cityName, this.dateTime});
 
   factory WeatherData.fromJson(Map<String, dynamic> value) {
+
     return WeatherData(
         lon: value['coord']['lon'].toDouble(),
         lat: value['coord']['lat'].toDouble(),
@@ -32,7 +33,8 @@ class WeatherData{
         weatherDesc: value['weather'][0]['description'],
         weatherTemp: value['main']['temp'].toDouble(),
         weatherHumidity: value['main']['humidity'].toDouble(),
-        cityName: value['name']
+        cityName: value['name'],
+        dateTime: value['dt']
     );
   }
   
