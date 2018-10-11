@@ -1,8 +1,14 @@
-# weather_application
+# FlutterWeather
+Cross-platform, native weather app for iOS and Android. This application was developed using Google's and Dart's framework called "Flutter." The idea is to show how new and how much potential the framework has gained.
 
-A new Flutter application.
+# API
+[Open Weather](https://openweathermap.org/api) - free source api
 
-## Getting Started
+# Dependencies 
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+ - [http](https://github.com/dart-lang/http)
+ - [location](https://github.com/Lyokone/flutterlocation)
+ - [geocoder](https://github.com/aloisdeniel/flutter_geocoder)
+
+# Screenshot
+![](./screenshoots/screen.png)
