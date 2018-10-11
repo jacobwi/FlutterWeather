@@ -5,5 +5,8 @@ class $res {
 }
 
 class $img {
-  static const String background = "assets/img/Sun.png";
+  static const String morning = "assets/img/morning.png";
+  static const String afternoon = "assets/img/afternoon.png";
+  static const String night = "assets/img/night.png";
+  static const String defaultImg = "assets/img/default.png";
 }

@@ -9,6 +9,7 @@ import 'package:weather_application/ui/res.dart';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
 import 'package:weather_application/ui/WeatherItem.dart';
+import 'package:intl/intl.dart';
 class Weather extends State<HomePage> {
   Map<String, double> currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSub;
@@ -17,6 +18,10 @@ class Weather extends State<HomePage> {
   bool isLoading = false;
   Location location;
   String zipCode = "03301";
+  String img="";
+  static Color dynamicFontColor;
+  int dataTime;
+  Color themeColor;
   @override
   void initState() {
     super.initState();
@@ -36,6 +41,8 @@ class Weather extends State<HomePage> {
       var result = json.decode(respone.body);
       return setState(() {
         weatherData = new WeatherData.fromJson(result);
+        dataTime = weatherData.dateTime;
+        setBackgroundImage();
         isLoading = false;
       });
     }
@@ -60,6 +67,8 @@ class Weather extends State<HomePage> {
       var result = json.decode(respone.body);
       return setState(() {
         weatherData = new WeatherData.fromJson(result);
+        dataTime = weatherData.dateTime;
+        setBackgroundImage();
         isLoading = false;
       });
     }
@@ -72,7 +81,42 @@ class Weather extends State<HomePage> {
 
 
   }
+  void setBackgroundImage() async {
+    final cityTime = new DateTime.fromMicrosecondsSinceEpoch((dataTime * 1000));
+    if (cityTime != null) {
+      final hour = new DateFormat ("H");
+      final amOrPm = new DateFormat("a");
+      print(hour.format(cityTime));
+      print(amOrPm.format(cityTime).trim());
 
+      if (amOrPm.format(cityTime).trim() == "PM") {
+        if (int.parse(hour.format(cityTime)) < 17 ) {
+          setState(() {
+            img = $img.afternoon;
+            print("afternoon");
+            dynamicFontColor = Color(0xFFFFFFFF);
+          });
+
+        }
+        else {
+          setState(() {
+            img = $img.night;
+            print("night");
+            dynamicFontColor = Color(0xFFFFFFFF);
+          });
+        }
+      }
+      else {
+        setState(() {
+          img = $img.morning;
+          dynamicFontColor = Color(0xDD595877);
+        });
+
+
+      }
+    }
+
+  }
   submitData(String zip) {
     if (!zip.isEmpty) {
       fetchData();
@@ -84,12 +128,16 @@ class Weather extends State<HomePage> {
     myController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
+
+
+
     return new Scaffold(
       body: Container(
         decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage($img.background), fit:
+            image: DecorationImage(image: AssetImage(img.isEmpty ? $img.defaultImg: img), fit:
             BoxFit.cover)
         ),
         child: Column(
@@ -161,6 +209,7 @@ class Weather extends State<HomePage> {
       currentLocation = myLocation;
     });
   }
+
 
 
 

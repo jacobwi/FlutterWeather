@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_application/ui/res.dart';
 import 'package:weather_application/data/WeatherData.dart';
+import 'package:weather_application/ui/Weather.dart';
 import 'package:intl/intl.dart';
 class WeatherItem extends StatelessWidget {
   final WeatherData data;
@@ -10,12 +11,11 @@ class WeatherItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cityTime = new DateTime.fromMillisecondsSinceEpoch(data.dateTime);
     final f = new DateFormat("hh:mm a");
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         new Text(data.cityName, style: TextStyle(
-          color: $res.tempColors,
+          color: Weather.dynamicFontColor,
           fontSize: 23.0,
           fontWeight: FontWeight.w500,
         )),
@@ -23,20 +23,20 @@ class WeatherItem extends StatelessWidget {
             '${data.weatherDesc[0].toUpperCase()}${data.weatherDesc.substring(
                 1)}',
             style: TextStyle(
-              color: $res.tempColors,
+              color: Weather.dynamicFontColor,
               fontSize: 19.0,
               fontWeight: FontWeight.w500,
             )
         ),
         new Text(data.weatherTemp.toString().split(
             ".")[0] + "°", style: TextStyle(
-          color: $res.tempColors,
+          color: Weather.dynamicFontColor,
           fontSize: 70.0,
           fontWeight: FontWeight.w500,
         )),
         new Text(f.format(cityTime),
             style: TextStyle(
-          color: $res.tempColors,
+          color: Weather.dynamicFontColor,
           fontSize: 12.0,
           fontStyle: FontStyle.italic,
           fontWeight: FontWeight.w500,
