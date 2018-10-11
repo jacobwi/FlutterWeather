@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Flutter Plugins" type="FlutterPluginsLibraryType">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Downloads/flutter_windows_v0.8.2-beta/flutter/.pub-cache/hosted/pub.dartlang.org/location-1.4.1" />
+      <root url="file://$USER_HOME$/Downloads/flutter_windows_v0.8.2-beta/flutter/.pub-cache/hosted/pub.dartlang.org/geocoder-0.1.1" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
