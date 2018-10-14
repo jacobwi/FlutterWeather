@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class WeatherData{
+class WeatherData {
 
   // Coords
   double lon;
@@ -20,8 +20,10 @@ class WeatherData{
 
   String cityName;
   int dateTime;
+  DateTime realTime;
+  String icon;
   WeatherData({this.lon, this.lat, this.id, this.weather, this.weatherDesc,
-      this.weatherTemp, this.weatherHumidity, this.cityName, this.dateTime});
+      this.weatherTemp, this.weatherHumidity, this.cityName, this.dateTime, this.realTime, this.icon});
 
   factory WeatherData.fromJson(Map<String, dynamic> value) {
 
@@ -34,7 +36,9 @@ class WeatherData{
         weatherTemp: value['main']['temp'].toDouble(),
         weatherHumidity: value['main']['humidity'].toDouble(),
         cityName: value['name'],
-        dateTime: value['dt']
+        dateTime: value['dt'],
+        realTime: new DateTime.fromMillisecondsSinceEpoch(value['dt'] * 1000, isUtc: false),
+        icon: value['weather'][0]['icon'],
     );
   }
   

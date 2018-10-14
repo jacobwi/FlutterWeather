@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:weather_application/ui/HomePage.dart';
 import 'package:weather_application/data/WeatherData.dart';
+import 'package:weather_application/data/ForecastData.dart';
 import 'package:weather_application/network/Api.dart';
+import 'package:weather_application/ui/ForecastItem.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -10,16 +11,28 @@ import 'package:location/location.dart';
 import 'package:flutter/services.dart';
 import 'package:weather_application/ui/WeatherItem.dart';
 import 'package:intl/intl.dart';
-class Weather extends State<HomePage> {
+String zipCode = "03102";
+
+class Weather extends StatefulWidget {
+  static Color dynamicFontColor;
+  @override
+  State<StatefulWidget> createState() {
+    return new _WeatherState();
+  }
+
+}
+
+
+class _WeatherState extends State<Weather> {
   Map<String, double> currentLocation = new Map();
   StreamSubscription<Map<String, double>> locationSub;
   final myController = new TextEditingController();
   WeatherData weatherData;
+  ForecastData forecastData;
   bool isLoading = false;
   Location location;
-  String zipCode = "03301";
+
   String img="";
-  static Color dynamicFontColor;
   int dataTime;
   Color themeColor;
   @override
@@ -32,16 +45,21 @@ class Weather extends State<HomePage> {
   }
 
   fetchData() async {
+    dataTime = 0;
     setState(() {
       isLoading = true;
     });
 
     final respone = await http.get("http://api.openweathermap.org/data/2.5/weather?zip=$zipCode,us&APPID=" + Api.apiCode);
-    if (respone.statusCode == 200) {
+    final respone_forecast = await http.get("http://api.openweathermap.org/data/2.5/forecast?zip=$zipCode&appid=" + Api.apiCode);
+    if (respone.statusCode == 200 && respone_forecast.statusCode == 200) {
       var result = json.decode(respone.body);
+      var result_forecast = json.decode(respone_forecast.body);
       return setState(() {
         weatherData = new WeatherData.fromJson(result);
+        forecastData = new ForecastData.fromJson(result_forecast);
         dataTime = weatherData.dateTime;
+        refreshWeather();
         setBackgroundImage();
         isLoading = false;
       });
@@ -57,6 +75,7 @@ class Weather extends State<HomePage> {
   }
 
   fetchDataFromCoords() async {
+    dataTime = 0;
     setState(() {
       isLoading = true;
     });
@@ -68,6 +87,7 @@ class Weather extends State<HomePage> {
       return setState(() {
         weatherData = new WeatherData.fromJson(result);
         dataTime = weatherData.dateTime;
+        refreshWeather();
         setBackgroundImage();
         isLoading = false;
       });
@@ -82,7 +102,7 @@ class Weather extends State<HomePage> {
 
   }
   void setBackgroundImage() async {
-    final cityTime = new DateTime.fromMicrosecondsSinceEpoch((dataTime * 1000));
+    final cityTime = new DateTime.fromMillisecondsSinceEpoch((dataTime * 1000));
     if (cityTime != null) {
       final hour = new DateFormat ("H");
       final amOrPm = new DateFormat("a");
@@ -94,7 +114,7 @@ class Weather extends State<HomePage> {
           setState(() {
             img = $img.afternoon;
             print("afternoon");
-            dynamicFontColor = Color(0xFFFFFFFF);
+            Weather.dynamicFontColor = Color(0xFFFFFFFF);
           });
 
         }
@@ -102,14 +122,14 @@ class Weather extends State<HomePage> {
           setState(() {
             img = $img.night;
             print("night");
-            dynamicFontColor = Color(0xFFFFFFFF);
+            Weather.dynamicFontColor = Color(0xFFFFFFFF);
           });
         }
       }
       else {
         setState(() {
           img = $img.morning;
-          dynamicFontColor = Color(0xDD595877);
+          Weather.dynamicFontColor = Color(0xDD595877);
         });
 
 
@@ -122,6 +142,10 @@ class Weather extends State<HomePage> {
       fetchData();
     }
   }
+
+  refreshWeather() {
+    return weatherData != null ? WeatherItem(data: weatherData) : Container();
+  }
   @override
   void dispose() {
     // Clean up the controller when the Widget is removed from the Widget tree
@@ -132,13 +156,14 @@ class Weather extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
+    return Material(
 
 
-    return new Scaffold(
-      body: Container(
+      child: new Container(
+        height: MediaQuery.of(context).size.height * 1,
         decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage(img.isEmpty ? $img.defaultImg: img), fit:
-            BoxFit.cover)
+            image: DecorationImage(image: AssetImage(img.isEmpty ? $img.defaultImg: img),
+                fit: BoxFit.cover)
         ),
         child: Column(
           children: <Widget>[
@@ -156,31 +181,31 @@ class Weather extends State<HomePage> {
                     },
                     onSubmitted: submitData,
                     decoration: new InputDecoration(
-                      border: UnderlineInputBorder(
-                        borderRadius: BorderRadius.circular(40.0),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.location_city,
-                        color: $res.tempColors,
-                      ),
-                      suffixIcon: new IconButton(
-                        icon: new Icon(Icons.gps_fixed),
-                        color: Colors.black,
-                        onPressed: () { setState(() {
-                          location = new Location();
-                          initPlatformState();
-                          if(currentLocation['latitude'] != 0.0 || currentLocation['longitude'] != 0.0) {
-                            fetchDataFromCoords();
-                            print(currentLocation['latitude'].toString());
-                          }
-                        }); },
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey,
-                      hintText: "Enter zipcode...",
-                      hintStyle: TextStyle(
-                        color: $res.tempColors
-                      )
+                        border: UnderlineInputBorder(
+                          borderRadius: BorderRadius.circular(40.0),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.location_city,
+                          color: $res.tempColors,
+                        ),
+                        suffixIcon: new IconButton(
+                          icon: new Icon(Icons.gps_fixed),
+                          color: Colors.black,
+                          onPressed: () { setState(() {
+                            location = new Location();
+                            initPlatformState();
+                            if(currentLocation['latitude'] != 0.0 || currentLocation['longitude'] != 0.0) {
+                              fetchDataFromCoords();
+                              print(currentLocation['latitude'].toString());
+                            }
+                          }); },
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey,
+                        hintText: "Enter zipcode...",
+                        hintStyle: TextStyle(
+                            color: $res.tempColors
+                        )
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -188,12 +213,38 @@ class Weather extends State<HomePage> {
             ),
             Padding(
               padding: const EdgeInsets.all(0.0),
-              child: weatherData != null ? WeatherItem(data: weatherData) : Container(),
+              child: refreshWeather(),
+            ),
+            Container(
+              alignment: Alignment.topCenter,
+              padding: new EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * .18),
+              child: new Container(
+                  height: 240.0,
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0.0),
+                    child: new Container(
+                      color: Colors.transparent,
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            child: forecastData != null ? ListView.builder(
+                                itemCount: forecastData.forecastList.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) => ForecastItem(data: forecastData.forecastList.elementAt(index))
+                            ) : Container(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ),
             )
           ],
         ),
       ),
-      resizeToAvoidBottomPadding: false,
     );
   }
 

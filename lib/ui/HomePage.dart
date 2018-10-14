@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:weather_application/ui/Weather.dart';
-class HomePage extends StatefulWidget {
-
+class HomePage extends StatelessWidget {
   @override
-  State<StatefulWidget> createState() {
-    return new Weather();
+  Widget build(BuildContext context) {
+    return Stack(
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              Weather(),
+            ],
+          ),
+        ],
+    );
   }
-
-
 }
